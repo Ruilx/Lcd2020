@@ -10,7 +10,7 @@ class DrawingPanel : public QWidget
 
 	QImage *image = new QImage();
 
-	QSize pixelSize = QSize(20, 20);
+	QSize pixelSize = QSize(10, 10);
 	QSize margin = QSize(5, 5);
 	inline int marginH() const {return margin.width();}
 	inline int marginV() const {return margin.height();}
@@ -29,42 +29,59 @@ class DrawingPanel : public QWidget
 		for(int line = 0; line < this->image->height(); line++){
 			QRgb *lp = (QRgb*)(this->image->scanLine(line));
 			for(int column = 0; column < this->image->width(); column++){
-				if(*lp == 0xFFFFFFFF){
-					painter.setBrush(Qt::yellow);
-					painter.drawRect(QRect(imageToPanel(QPoint(column, line)), this->pixelSize));
-				}else{
-					painter.setBrush(Qt::black);
-					painter.drawRect(QRect(imageToPanel(QPoint(column, line)), this->pixelSize));
-				}
+				painter.setBrush(QColor(*lp));
+				painter.drawRect(QRect(imageToPanel(QPoint(column, line)), this->pixelSize));
 				lp++;
 			}
 		}
 		painter.end();
 	}
 
-	void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE {
-		QPoint pos = event->pos();
+//	void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE {
+//		QPoint pos = event->pos();
+//		if(this->image->isNull()){
+//			qDebug() << "Current Image is null";
+//			return;
+//		}
+//		qDebug() << "Current Pos:" << pos;
+//		bool ok = false;
+//		QPoint loc = this->panelToImage(pos, &ok);
+//		if(ok){
+//			qDebug() << "Looking Loc:" << loc;
+//			if(this->image->width() < loc.x() || this->image->height() < loc.y()){
+//				qDebug() << "The panel is bigger than Image and detected out of bounds.";
+//				return;
+//			}
+//			if(event->button() == Qt::RightButton){
+//				this->image->setPixelColor(loc, Qt::black);
+//			}else if(event->button() == Qt::LeftButton){
+//				this->image->setPixelColor(loc, Qt::white);
+//			}
+//			this->update();
+//		}else{
+//			qDebug() << "Invalid Loc.";
+//		}
+//	}
+
+	void mouseMoveEvent(QMouseEvent *event) Q_DECL_OVERRIDE {
+		const QPoint pos = event->pos();
+		const Qt::MouseButtons buttons = event->buttons();
+		qDebug() << "Pressed at:" << pos << "buttons:" << buttons;
 		if(this->image->isNull()){
 			qDebug() << "Current Image is null";
-			return;
 		}
-		qDebug() << "Current Pos:" << pos;
 		bool ok = false;
 		QPoint loc = this->panelToImage(pos, &ok);
 		if(ok){
-			qDebug() << "Looking Loc:" << loc;
 			if(this->image->width() < loc.x() || this->image->height() < loc.y()){
-				qDebug() << "The panel is bigger than Image and detected out of bounds.";
 				return;
 			}
-			if(event->button() == Qt::RightButton){
+			if(buttons & Qt::RightButton){
 				this->image->setPixelColor(loc, Qt::black);
-			}else if(event->button() == Qt::LeftButton){
+			}else if(buttons & Qt::LeftButton){
 				this->image->setPixelColor(loc, Qt::white);
 			}
 			this->update();
-		}else{
-			qDebug() << "Invalid Loc.";
 		}
 	}
 
@@ -120,7 +137,7 @@ public:
 		this->setPalette(palette);
 		this->setAutoFillBackground(true);
 
-		this->setSize(QSize(16, 16));
+		this->setSize(QSize(32, 32));
 
 	}
 
@@ -130,6 +147,7 @@ public:
 		}
 		QImage::Format imageFormat = this->image->format() == QImage::Format_Invalid ? QImage::Format_ARGB32_Premultiplied : this->image->format();
 		QImage *newImage = new QImage(size, imageFormat);
+		newImage->fill(Qt::black);
 		QPainter newImagePainter(newImage);
 		newImagePainter.drawImage(0, 0, *this->image);
 		newImagePainter.end();
