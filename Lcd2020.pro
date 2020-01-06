@@ -26,11 +26,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         MainWindow.cpp \
-    DrawingPanel.cpp
+    DrawingPanel.cpp \
+    NewImageDialog.cpp
 
 HEADERS += \
         MainWindow.h \
-    DrawingPanel.h
+    DrawingPanel.h \
+    NewImageDialog.h
 
 DISTFILES += \
 	README.md \

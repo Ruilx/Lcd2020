@@ -10,11 +10,11 @@ class DrawingPanel : public QWidget
 
 	QImage *image = new QImage();
 
-	QSize pixelSize = QSize(10, 10);
+	QSize pixelSize = QSize(20, 20);
 	QSize margin = QSize(5, 5);
 	inline int marginH() const {return margin.width();}
 	inline int marginV() const {return margin.height();}
-	QSize padding = QSize(2, 2);
+	QSize padding = QSize(0, 0);
 	inline int paddingH() const {return padding.width();}
 	inline int paddingV() const {return padding.height();}
 
@@ -37,36 +37,36 @@ class DrawingPanel : public QWidget
 		painter.end();
 	}
 
-//	void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE {
-//		QPoint pos = event->pos();
-//		if(this->image->isNull()){
-//			qDebug() << "Current Image is null";
-//			return;
-//		}
-//		qDebug() << "Current Pos:" << pos;
-//		bool ok = false;
-//		QPoint loc = this->panelToImage(pos, &ok);
-//		if(ok){
-//			qDebug() << "Looking Loc:" << loc;
-//			if(this->image->width() < loc.x() || this->image->height() < loc.y()){
-//				qDebug() << "The panel is bigger than Image and detected out of bounds.";
-//				return;
-//			}
-//			if(event->button() == Qt::RightButton){
-//				this->image->setPixelColor(loc, Qt::black);
-//			}else if(event->button() == Qt::LeftButton){
-//				this->image->setPixelColor(loc, Qt::white);
-//			}
-//			this->update();
-//		}else{
-//			qDebug() << "Invalid Loc.";
-//		}
-//	}
+	void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE {
+		QPoint pos = event->pos();
+		if(this->image->isNull()){
+			return;
+		}
+		qDebug() << "Current Pos:" << pos;
+		bool ok = false;
+		QPoint loc = this->panelToImage(pos, &ok);
+		if(ok){
+			qDebug() << "Looking Loc:" << loc;
+			if(this->image->width() < loc.x() || this->image->height() < loc.y()){
+				return;
+			}
+			if(event->button() == Qt::RightButton){
+				this->image->setPixelColor(loc, Qt::black);
+				this->update();
+				event->accept();
+				return;
+			}else if(event->button() == Qt::LeftButton){
+				this->image->setPixelColor(loc, Qt::white);
+				this->update();
+				event->accept();
+				return;
+			}
+		}
+	}
 
 	void mouseMoveEvent(QMouseEvent *event) Q_DECL_OVERRIDE {
 		const QPoint pos = event->pos();
 		const Qt::MouseButtons buttons = event->buttons();
-		qDebug() << "Pressed at:" << pos << "buttons:" << buttons;
 		if(this->image->isNull()){
 			qDebug() << "Current Image is null";
 		}
@@ -78,10 +78,15 @@ class DrawingPanel : public QWidget
 			}
 			if(buttons & Qt::RightButton){
 				this->image->setPixelColor(loc, Qt::black);
+				this->update();
+				event->accept();
+				return;
 			}else if(buttons & Qt::LeftButton){
 				this->image->setPixelColor(loc, Qt::white);
+				this->update();
+				event->accept();
+				return;
 			}
-			this->update();
 		}
 	}
 
@@ -130,14 +135,14 @@ class DrawingPanel : public QWidget
 public:
 	explicit DrawingPanel(QWidget *parent = nullptr): QWidget(parent){
 		//this->setMinimumSize(480, 320);
-		QPalette palette = this->palette();{
-			palette.setColor(QPalette::Base, QColor(128, 128, 128));
-			palette.setColor(QPalette::Background, QColor(128, 128, 128));
-		}
-		this->setPalette(palette);
+//		QPalette palette = this->palette();{
+//			palette.setColor(QPalette::Base, QColor(128, 128, 128));
+//			palette.setColor(QPalette::Background, QColor(128, 128, 128));
+//		}
+//		this->setPalette(palette);
 		this->setAutoFillBackground(true);
 
-		this->setSize(QSize(32, 32));
+		this->setSize(QSize(40, 8));
 
 	}
 
@@ -165,21 +170,33 @@ public:
 	inline void setPixelSize(const QSize &size) Q_DECL_NOTHROW {
 		if(size.width() > 0 && size.height() > 0){
 			this->pixelSize = size;
-
+			this->doPanelResize(this->image->size());
+			this->update();
 		}
 	}
 
 	inline void setMargin(const QSize &margin) Q_DECL_NOTHROW {
 		if(margin.width() >= 0 && margin.height() >= 0){
 			this->margin = margin;
+			this->doPanelResize(this->image->size());
+			this->update();
 		}
 	}
 
 	inline void setPadding(const QSize &padding) Q_DECL_NOTHROW {
 		if(padding.width() >= 0 && padding.height() >= 0){
 			this->padding = padding;
+			this->doPanelResize(this->image->size());
+			this->update();
 		}
 	}
+
+	void clear(){
+		this->image->fill(Qt::black);
+		this->update();
+	}
+
+
 
 signals:
 
