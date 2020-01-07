@@ -10,6 +10,7 @@ class NewImageDialog : public QDialog
 	QSpinBox *widthBox = new QSpinBox(this);
 	QSpinBox *heightBox = new QSpinBox(this);
 	QComboBox *modeBox = new QComboBox(this);
+	QLabel *tipLabel = new QLabel(this);
 
 	QDialogButtonBox *btnBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, this);
 
@@ -18,9 +19,35 @@ class NewImageDialog : public QDialog
 		mainLay->addRow("Image width", this->widthBox);
 		mainLay->addRow("Image height", this->heightBox);
 		mainLay->addRow("Image mode", this->modeBox);
+		mainLay->addRow(this->tipLabel);
 		mainLay->addRow(this->btnBox);
 		this->setLayout(mainLay);
 		mainLay->setSizeConstraint(QLayout::SetFixedSize);
+	}
+
+	static const QString getModeDescription(int index){
+		switch(index){
+			case 0: /* 用两种颜色代表亮和灭, 一个字节表示8个点阵, 可以在输出设置中指定方向和行列 */
+				return tr("Two colors are used to represent on and off, one byte represents 8 dot matrix. The direction and rank can be specified in the output settings.");
+			case 1: /* 使用预置的调色板选中4种颜色, 一个字节表示4个点阵, 可以在输出设置中指定方向和行列 */
+				return tr("Use the preset palette to select 4 colors, one byte represents 4 dot matrix, and you can specify the direction and rank in the output settings.");
+			case 2: /* 使用预置的调色板选中16种颜色, 一个字节表示两个点阵, 可以在输出中指定方向和行列 */
+				return tr("Use the preset palette to select 16 colors, one byte represents 2 dot matrix, and you can specify the direction and rank in the output settings.");
+			case 3: /* 使用预置的调色板选中256种颜色, 一个字节表示一个点阵, 可以在输出中指定方向和行列 */
+				return tr("Use the preset palette to select 256 colors, one byte represents 1 dot, and you can specify the direction and rank in the output settings.");
+			case 4: /* 32768种RGB颜色, 使用ARGB1555格式, 最高位透明通道默认为1, 两个字节表示一个点阵, 可以在输出中指定方向和行列 */
+				return tr("32768 RGB colors, using ARGB1555 format, the highest bit transparent channel defaults to 1, two bytes represent a dot matrix, the direction and rank can be specified in the output settings.");
+			case 5: /* 65536种RGB颜色, 使用RGB565格式, 两个字节表示一个点阵, 可以在输出中指定方向和行列 */
+				return tr("65536 RGB colors, using RGB565 format, two bytes represent a dot matrix, the direction and rank can be specified in the output settings.");
+			case 6: /* 262144种颜色, 使用RGB666格式, 三个字节表示4/3个点阵, 可以在输出中指定方向和行列 */
+				return tr("262144 colors, using RGB666 format, three bytes represent 4/3 dot matrix, the direction and rows can be specified in the output settings.");
+			case 7: /* 16777216种颜色, 使用RGB888格式, 三个字节表示一个点阵, 可以在输出中指定方向和行列 */
+				return tr("16777216 colors, using RGB888 format, three bytes represent a dot matrix, the direction and rows can be specified in the output settings.");
+			case 8: /* 16777216种颜色, 使用ARGB8888格式, 四个字节表示一个点阵, 透明通道默认为255, 可以在输出中指定方向和行列 */
+				return tr("16777216 colors, using ARGB8888 format, four bytes represent a dot matrix, transparent channel defaults to 255, you can specify the direction and rank in the output settings.");
+			default:
+				return tr("Unknown mode, cannot display the description.");
+		}
 	}
 
 	void setupOptions(){
@@ -35,15 +62,19 @@ class NewImageDialog : public QDialog
 		this->modeBox->addItem("4 Colors [2 bits] (Palette)", "4");
 		this->modeBox->addItem("16 Colors [4 bits] (Palette)", "16");
 		this->modeBox->addItem("256 Colors [8 bits] (Palette)", "256");
-		this->modeBox->addItem("32768 Colors [15 bits available] (ARGB1555 Leave alpha channel set to 1)", "32768");
+		this->modeBox->addItem("32768 Colors [15 bits] (ARGB1555)", "32768");
 		this->modeBox->addItem("65536 Colors [16 bits] (RGB565)", "65536");
 		this->modeBox->addItem("262K Colors [18 bits] (RGB666)", "262144");
 		this->modeBox->addItem("16.7M Colors [24 bits] (RGB888)", "16777216");
-		this->modeBox->addItem("16.7M Colors with alpha channel placeholder [32bits] (ARGB8888 Leave alpha channel set to 255)", "4294967296");
+		this->modeBox->addItem("16.7M Colors [32 bits] (ARGB8888)", "4294967296");
+
+		this->tipLabel->setText(NewImageDialog::getModeDescription(this->modeBox->currentIndex()));
+		this->tipLabel->setMaximumWidth(350);
+		this->tipLabel->setWordWrap(true);
 
 		this->connect(this->modeBox, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index){
-			Q_UNUSED(this);
 			qDebug() << "Index:" << index;
+			this->tipLabel->setText(NewImageDialog::getModeDescription(index));
 		});
 
 		this->connect(this->btnBox, &QDialogButtonBox::accepted, this, &NewImageDialog::accept);
