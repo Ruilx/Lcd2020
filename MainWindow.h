@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "DrawingPanel.h"
+#include "NewImageDialog.h"
 
 class MainWindow : public QMainWindow
 {
@@ -15,8 +16,11 @@ class MainWindow : public QMainWindow
 		QAction *newImageAct = new QAction("New Image(&N)", this);
 		fileMenu->addAction(newImageAct);
 		this->connect(newImageAct, &QAction::triggered, [this](bool){
-
+			NewImageDialog dialog(this);
+			int ret = dialog.exec();
+			qDebug() << ret;
 		});
+		this->menuBar()->addMenu(fileMenu);
 
 		QMenu *editMenu = new QMenu("Edit(&E)", this);
 		QAction *clearImageAct = new QAction("Clear Image(&C)", this);
