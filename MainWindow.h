@@ -18,7 +18,12 @@ class MainWindow : public QMainWindow
 		this->connect(newImageAct, &QAction::triggered, [this](bool){
 			NewImageDialog dialog(this);
 			int ret = dialog.exec();
-			qDebug() << ret;
+			if(!ret){
+				return;
+			}
+			QSize imageSize = dialog.getImageSize();
+			NewImageDialog::ImageMode imageMode = dialog.getImageMode();
+			qDebug() << imageSize << imageMode;
 		});
 		this->menuBar()->addMenu(fileMenu);
 

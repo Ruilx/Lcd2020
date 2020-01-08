@@ -6,11 +6,27 @@
 class NewImageDialog : public QDialog
 {
 	Q_OBJECT
+public:
+	enum ImageMode{
+		ColorUnknown = -1,
+		Colors2 = 0,
+		Colors4,
+		Colors16,
+		Colors256,
+		Colors32768,
+		Colors65536,
+		Colors262144,
+		Colors16777216,
+		Colors4294967296
+	};
 
+private:
 	QSpinBox *widthBox = new QSpinBox(this);
 	QSpinBox *heightBox = new QSpinBox(this);
 	QComboBox *modeBox = new QComboBox(this);
 	QLabel *tipLabel = new QLabel(this);
+
+	bool ready = false;
 
 	QDialogButtonBox *btnBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, this);
 
@@ -58,15 +74,15 @@ class NewImageDialog : public QDialog
 		this->widthBox->setSingleStep(1);
 		this->heightBox->setSingleStep(1);
 
-		this->modeBox->addItem("2 Colors [1 bit] (On/Off Palette)", "2");
-		this->modeBox->addItem("4 Colors [2 bits] (Palette)", "4");
-		this->modeBox->addItem("16 Colors [4 bits] (Palette)", "16");
-		this->modeBox->addItem("256 Colors [8 bits] (Palette)", "256");
-		this->modeBox->addItem("32768 Colors [15 bits] (ARGB1555)", "32768");
-		this->modeBox->addItem("65536 Colors [16 bits] (RGB565)", "65536");
-		this->modeBox->addItem("262K Colors [18 bits] (RGB666)", "262144");
-		this->modeBox->addItem("16.7M Colors [24 bits] (RGB888)", "16777216");
-		this->modeBox->addItem("16.7M Colors [32 bits] (ARGB8888)", "4294967296");
+		this->modeBox->addItem("2 Colors [1 bit] (On/Off Palette)", Colors2);
+		this->modeBox->addItem("4 Colors [2 bits] (Palette)", Colors4);
+		this->modeBox->addItem("16 Colors [4 bits] (Palette)", Colors16);
+		this->modeBox->addItem("256 Colors [8 bits] (Palette)", Colors256);
+		this->modeBox->addItem("32768 Colors [15 bits] (ARGB1555)", Colors32768);
+		this->modeBox->addItem("65536 Colors [16 bits] (RGB565)", Colors65536);
+		this->modeBox->addItem("262K Colors [18 bits] (RGB666)", Colors262144);
+		this->modeBox->addItem("16.7M Colors [24 bits] (RGB888)", Colors16777216);
+		this->modeBox->addItem("16.7M Colors [32 bits] (ARGB8888)", Colors4294967296);
 
 		this->tipLabel->setText(NewImageDialog::getModeDescription(this->modeBox->currentIndex()));
 		this->tipLabel->setMaximumWidth(350);
@@ -77,14 +93,34 @@ class NewImageDialog : public QDialog
 			this->tipLabel->setText(NewImageDialog::getModeDescription(index));
 		});
 
-		this->connect(this->btnBox, &QDialogButtonBox::accepted, this, &NewImageDialog::accept);
+		this->connect(this->btnBox, &QDialogButtonBox::accepted, [this](){
+			this->ready = true;
+			this->accept();
+		});
 		this->connect(this->btnBox, &QDialogButtonBox::rejected, this, &NewImageDialog::reject);
 	}
 
 public:
+
 	explicit NewImageDialog(QWidget *parent = nullptr) : QDialog(parent){
 		this->setupOptions();
 		this->setupLayout();
+	}
+
+	const QSize getImageSize(){
+		if(this->ready){
+			return QSize(this->widthBox->value(), this->heightBox->value());
+		}
+		qWarning() << "Using exec() to show the dialog first.";
+		return QSize();
+	}
+
+	ImageMode getImageMode() const{
+		if(this->ready){
+			return (ImageMode)this->modeBox->currentData().toInt();
+		}
+		qWarning() << "Using exec() to show the dialog first.";
+		return ColorUnknown;
 	}
 
 signals:
