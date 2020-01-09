@@ -31,7 +31,7 @@ private:
 	QDialogButtonBox *btnBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, this);
 
 	void setupLayout(){
-		QFormLayout *mainLay = new QFormLayout(this);
+		QFormLayout *mainLay = new QFormLayout;
 		mainLay->addRow("Image width", this->widthBox);
 		mainLay->addRow("Image height", this->heightBox);
 		mainLay->addRow("Image mode", this->modeBox);

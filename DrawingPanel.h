@@ -20,18 +20,25 @@ class DrawingPanel : public QWidget
 
 	void paintEvent(QPaintEvent *event) Q_DECL_OVERRIDE {
 		Q_UNUSED(event);
-//		if(this->pixmap == nullptr || this->pixmap->isNull()){
-//			return;
-//		}
+
 		QPainter painter(this);
-		painter.setPen(Qt::white);
-		//painter.drawText(this->size().width() / 2, this->size().height() / 2, "Hello, world");
-		for(int line = 0; line < this->image->height(); line++){
-			QRgb *lp = (QRgb*)(this->image->scanLine(line));
-			for(int column = 0; column < this->image->width(); column++){
-				painter.setBrush(QColor(*lp));
-				painter.drawRect(QRect(imageToPanel(QPoint(column, line)), this->pixelSize));
-				lp++;
+
+		if(this->image == nullptr || this->image->isNull()){
+			painter.setPen(Qt::black);
+			QString msg = tr("Please click File -> New Image to create a new image.");
+			QFontMetrics fm(painter.font());
+			QSize msgSize = fm.boundingRect(msg).size();
+			painter.drawText((this->size().width() - msgSize.width()) / 2, (this->size().height() - msgSize.height()) / 2, msg);
+		}else{
+			painter.setPen(Qt::white);
+			//painter.drawText(this->size().width() / 2, this->size().height() / 2, "Hello, world");
+			for(int line = 0; line < this->image->height(); line++){
+				QRgb *lp = (QRgb*)(this->image->scanLine(line));
+				for(int column = 0; column < this->image->width(); column++){
+					painter.setBrush(QColor(*lp));
+					painter.drawRect(QRect(imageToPanel(QPoint(column, line)), this->pixelSize));
+					lp++;
+				}
 			}
 		}
 		painter.end();
@@ -134,7 +141,7 @@ class DrawingPanel : public QWidget
 	}
 public:
 	explicit DrawingPanel(QWidget *parent = nullptr): QWidget(parent){
-		//this->setMinimumSize(480, 320);
+		this->setMinimumSize(480, 320);
 //		QPalette palette = this->palette();{
 //			palette.setColor(QPalette::Base, QColor(128, 128, 128));
 //			palette.setColor(QPalette::Background, QColor(128, 128, 128));
@@ -142,12 +149,22 @@ public:
 //		this->setPalette(palette);
 		this->setAutoFillBackground(true);
 
-		this->setSize(QSize(40, 8));
+//		this->setSize(QSize(40, 8));
 
 	}
 
+	void createNew(const QSize &size){
+		if(this->image && !this->image->isNull()){
+			int result = QMessageBox::question(this, tr("Create New Image"), tr("There has a modified image already, it will remove when new image created. Continue?"), QMessageBox::Yes|QMessageBox::No);
+			if(result == QMessageBox::No){
+				return;
+			}
+		}
+		this->setSize(size);
+	}
+
 	void setSize(const QSize &size){
-		if(size == this->image->size()){
+		if(this->image && size == this->image->size()){
 			return;
 		}
 		QImage::Format imageFormat = this->image->format() == QImage::Format_Invalid ? QImage::Format_ARGB32_Premultiplied : this->image->format();
@@ -167,12 +184,20 @@ public:
 		this->doPanelResize(size);
 	}
 
+	inline const QSize getSize() const Q_DECL_NOTHROW {
+		return this->image->size();
+	}
+
 	inline void setPixelSize(const QSize &size) Q_DECL_NOTHROW {
 		if(size.width() > 0 && size.height() > 0){
 			this->pixelSize = size;
 			this->doPanelResize(this->image->size());
 			this->update();
 		}
+	}
+
+	inline const QSize getPixelSize() const Q_DECL_NOTHROW {
+		return this->pixelSize;
 	}
 
 	inline void setMargin(const QSize &margin) Q_DECL_NOTHROW {
@@ -183,12 +208,20 @@ public:
 		}
 	}
 
+	inline const QSize getMargin() const Q_DECL_NOTHROW {
+		return this->margin;
+	}
+
 	inline void setPadding(const QSize &padding) Q_DECL_NOTHROW {
 		if(padding.width() >= 0 && padding.height() >= 0){
 			this->padding = padding;
 			this->doPanelResize(this->image->size());
 			this->update();
 		}
+	}
+
+	inline const QSize getPadding() const Q_DECL_NOTHROW {
+		return this->padding;
 	}
 
 	void clear(){
