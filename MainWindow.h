@@ -10,6 +10,7 @@ class MainWindow : public QMainWindow
 	Q_OBJECT
 
 	DrawingPanel *drawingPanel = new DrawingPanel(this);
+	QScrollArea *drawingPanelScrollArea = new QScrollArea(this);
 
 	void createMenus(){
 		QMenu *fileMenu = new QMenu(tr("File(&F)"), this);
@@ -25,7 +26,7 @@ class MainWindow : public QMainWindow
 			NewImageDialog::ImageMode imageMode = dialog.getImageMode();
 			qDebug() << "Create an image size:" << imageSize << "mode:" << imageMode;
 			this->drawingPanel->createNew(imageSize);
-			this->adjustSize();
+			//this->adjustSize();
 		});
 		this->menuBar()->addMenu(fileMenu);
 
@@ -48,14 +49,44 @@ class MainWindow : public QMainWindow
 				return;
 			}
 			this->drawingPanel->setPixelSize(QSize(result, result));
+			//this->adjustSize();
 		});
+
+		QAction *setImageMarginAct = new QAction(tr("Set View Margin(&M)"), this);
+		viewMenu->addAction(setImageMarginAct);
+		this->connect(setImageMarginAct, &QAction::triggered, [this](bool){
+			int marginSize = this->drawingPanel->getMargin().width(); // 随便选择一个维度(反正都一样)
+			bool ok = false;
+			int result = QInputDialog::getInt(this, tr("Image Margin"), tr("Enter a new margin size"), marginSize, 0, 100, 1, &ok);
+			if(!ok){
+				return;
+			}
+			this->drawingPanel->setMargin(QSize(result, result));
+			//this->adjustSize();
+		});
+
+		QAction *setImagePaddingAct = new QAction(tr("Set View Padding(&P)"), this);
+		viewMenu->addAction(setImagePaddingAct);
+		this->connect(setImagePaddingAct, &QAction::triggered, [this](bool){
+			int paddingSize = this->drawingPanel->getPadding().width(); // 随便选择一个维度(反正都一样)
+			bool ok = false;
+			int result = QInputDialog::getInt(this, tr("Image Padding"), tr("Enter a new padding size"), paddingSize, 0, 100, 1, &ok);
+			if(!ok){
+				return;
+			}
+			this->drawingPanel->setPadding(QSize(result, result));
+			//this->adjustSize();
+		});
+
 		this->menuBar()->addMenu(viewMenu);
+
 
 	}
 public:
 	MainWindow(QWidget *parent = 0): QMainWindow(parent){
 		this->createMenus();
-		this->setCentralWidget(this->drawingPanel);
+		this->setCentralWidget(this->drawingPanelScrollArea);
+		this->drawingPanelScrollArea->setWidget(this->drawingPanel);
 	}
 	~MainWindow();
 };

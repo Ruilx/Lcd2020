@@ -24,13 +24,14 @@ class DrawingPanel : public QWidget
 		QPainter painter(this);
 
 		if(this->image == nullptr || this->image->isNull()){
-			painter.setPen(Qt::black);
+			painter.setPen(Qt::white);
+			painter.setFont(QApplication::font());
 			QString msg = tr("Please click File -> New Image to create a new image.");
 			QFontMetrics fm(painter.font());
 			QSize msgSize = fm.boundingRect(msg).size();
 			painter.drawText((this->size().width() - msgSize.width()) / 2, (this->size().height() - msgSize.height()) / 2, msg);
 		}else{
-			painter.setPen(Qt::white);
+			painter.setPen(Qt::lightGray);
 			//painter.drawText(this->size().width() / 2, this->size().height() / 2, "Hello, world");
 			for(int line = 0; line < this->image->height(); line++){
 				QRgb *lp = (QRgb*)(this->image->scanLine(line));
@@ -117,16 +118,16 @@ class DrawingPanel : public QWidget
 		if(pointOnPanel.x() >= 0 && pointOnPanel.y() >= 0){
 			qreal refX = (pointOnPanel.x() - this->marginH()) / (this->paddingH() + this->pixelSize.width());
 			qreal refY = (pointOnPanel.y() - this->marginV()) / (this->paddingV() + this->pixelSize.height());
-			qreal modX = (pointOnPanel.x() - this->marginH()) % (this->paddingH() + this->pixelSize.width());
-			qreal modY = (pointOnPanel.y() - this->marginV()) % (this->paddingV() + this->pixelSize.height());
+			//qreal modX = (pointOnPanel.x() - this->marginH()) % (this->paddingH() + this->pixelSize.width());
+			//qreal modY = (pointOnPanel.y() - this->marginV()) % (this->paddingV() + this->pixelSize.height());
 			if(refX < 0 || refY < 0){
 				return QPoint();
 			}
-			if(modX <= this->paddingH() || modY <= this->paddingV()){
-				return QPoint();
-			}
+//			if(modX <= this->paddingH() || modY <= this->paddingV()){
+//				return QPoint();
+//			}
 			if(ok){ *ok = true; }
-			return QPoint(floor(refX), floor(refY));
+			return QPoint(qFloor(refX), qFloor(refY));
 		}
 		return QPoint();
 	}
@@ -137,16 +138,18 @@ class DrawingPanel : public QWidget
 	}
 
 	void doPanelResize(const QSize &imageSize){
-		this->setFixedSize(this->calPanelSize(imageSize));
+		//this->setFixedSize(this->calPanelSize(imageSize));
+		this->resize(this->calPanelSize(imageSize));
 	}
 public:
 	explicit DrawingPanel(QWidget *parent = nullptr): QWidget(parent){
-		this->setMinimumSize(480, 320);
-//		QPalette palette = this->palette();{
-//			palette.setColor(QPalette::Base, QColor(128, 128, 128));
-//			palette.setColor(QPalette::Background, QColor(128, 128, 128));
-//		}
-//		this->setPalette(palette);
+		//this->setMinimumSize(480, 320);
+		this->resize(400, 320);
+		QPalette palette = this->palette();{
+			palette.setColor(QPalette::Base, QColor(128, 128, 128));
+			palette.setColor(QPalette::Background, QColor(128, 128, 128));
+		}
+		this->setPalette(palette);
 		this->setAutoFillBackground(true);
 
 //		this->setSize(QSize(40, 8));
