@@ -80,13 +80,15 @@ class MainWindow : public QMainWindow
 
 		this->menuBar()->addMenu(viewMenu);
 
-
 	}
 public:
 	MainWindow(QWidget *parent = 0): QMainWindow(parent){
 		this->createMenus();
 		this->setCentralWidget(this->drawingPanelScrollArea);
+		this->drawingPanelScrollArea->setAlignment(Qt::AlignCenter);
 		this->drawingPanelScrollArea->setWidget(this->drawingPanel);
+		//this->drawingPanelScrollArea->setMinimumSize(this->drawingPanel->minimumSize());
+		this->drawingPanelScrollArea->resize(480, 320);
 	}
 	~MainWindow();
 };

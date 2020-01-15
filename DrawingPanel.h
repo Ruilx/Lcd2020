@@ -18,27 +18,37 @@ class DrawingPanel : public QWidget
 	inline int paddingH() const {return padding.width();}
 	inline int paddingV() const {return padding.height();}
 
+	void resizeEvent(QResizeEvent *event) Q_DECL_OVERRIDE {
+		qDebug() << __PRETTY_FUNCTION__ << "size:" << event->size();
+	}
+
 	void paintEvent(QPaintEvent *event) Q_DECL_OVERRIDE {
 		Q_UNUSED(event);
 
 		QPainter painter(this);
 
 		if(this->image == nullptr || this->image->isNull()){
-			painter.setPen(Qt::white);
+			painter.setPen(Qt::black);
 			painter.setFont(QApplication::font());
 			QString msg = tr("Please click File -> New Image to create a new image.");
 			QFontMetrics fm(painter.font());
 			QSize msgSize = fm.boundingRect(msg).size();
 			painter.drawText((this->size().width() - msgSize.width()) / 2, (this->size().height() - msgSize.height()) / 2, msg);
 		}else{
-			painter.setPen(Qt::lightGray);
-			//painter.drawText(this->size().width() / 2, this->size().height() / 2, "Hello, world");
-			for(int line = 0; line < this->image->height(); line++){
-				QRgb *lp = (QRgb*)(this->image->scanLine(line));
-				for(int column = 0; column < this->image->width(); column++){
-					painter.setBrush(QColor(*lp));
-					painter.drawRect(QRect(imageToPanel(QPoint(column, line)), this->pixelSize));
-					lp++;
+			if(this->pixelSize.width() == 1 && this->pixelSize.height() == 1){
+				// 中间应该以或者进行处理的, 但想到画矩形的时候要么有边框要么没有, 所以一个为1也感觉显示不出图片,
+				// 而且设置的时候也是直接设定两个值的, 所以在这里使用And连接, 如果显示一个块, 就直接画Image
+				painter.drawImage(this->margin.width(), this->margin.height(), *this->image);
+			}else{
+				painter.setPen(Qt::lightGray);
+				//painter.drawText(this->size().width() / 2, this->size().height() / 2, "Hello, world");
+				for(int line = 0; line < this->image->height(); line++){
+					QRgb *lp = (QRgb*)(this->image->scanLine(line));
+					for(int column = 0; column < this->image->width(); column++){
+						painter.setBrush(QColor(*lp));
+						painter.drawRect(QRect(imageToPanel(QPoint(column, line)), this->pixelSize));
+						lp++;
+					}
 				}
 			}
 		}
@@ -139,17 +149,17 @@ class DrawingPanel : public QWidget
 
 	void doPanelResize(const QSize &imageSize){
 		//this->setFixedSize(this->calPanelSize(imageSize));
-		this->resize(this->calPanelSize(imageSize));
+		this->resize(this->calPanelSize(imageSize + QSize(1, 1))); // Margin will add a extra rect border 1 to fix right and left margin same
 	}
 public:
 	explicit DrawingPanel(QWidget *parent = nullptr): QWidget(parent){
-		//this->setMinimumSize(480, 320);
-		this->resize(400, 320);
-		QPalette palette = this->palette();{
-			palette.setColor(QPalette::Base, QColor(128, 128, 128));
-			palette.setColor(QPalette::Background, QColor(128, 128, 128));
-		}
-		this->setPalette(palette);
+		this->setMinimumSize(480, 320);
+		this->resize(480, 320);
+//		QPalette palette = this->palette();{
+//			palette.setColor(QPalette::Base, QColor(128, 128, 128));
+//			palette.setColor(QPalette::Background, QColor(128, 128, 128));
+//		}
+//		this->setPalette(palette);
 		this->setAutoFillBackground(true);
 
 //		this->setSize(QSize(40, 8));
