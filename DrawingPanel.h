@@ -8,7 +8,7 @@ class DrawingPanel : public QWidget
 {
 	Q_OBJECT
 
-	QImage *image = new QImage();
+	QImage *image = new QImage;
 
 	QSize pixelSize = QSize(20, 20);
 	QSize margin = QSize(5, 5);
@@ -153,6 +153,8 @@ class DrawingPanel : public QWidget
 	}
 public:
 	explicit DrawingPanel(QWidget *parent = nullptr): QWidget(parent){
+		//Q_ASSERT_X(image, "Image is nullptr", "Image is nullptr");
+		//this->image = image;
 		this->setMinimumSize(480, 320);
 		this->resize(480, 320);
 //		QPalette palette = this->palette();{

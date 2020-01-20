@@ -27,12 +27,14 @@ SOURCES += \
         main.cpp \
         MainWindow.cpp \
     DrawingPanel.cpp \
-    NewImageDialog.cpp
+    NewImageDialog.cpp \
+    DrawingFrame.cpp
 
 HEADERS += \
         MainWindow.h \
     DrawingPanel.h \
-    NewImageDialog.h
+    NewImageDialog.h \
+    DrawingFrame.h
 
 DISTFILES += \
 	README.md \

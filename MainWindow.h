@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "DrawingPanel.h"
+#include "DrawingFrame.h"
 #include "NewImageDialog.h"
 
 class MainWindow : public QMainWindow
@@ -11,6 +12,9 @@ class MainWindow : public QMainWindow
 
 	DrawingPanel *drawingPanel = new DrawingPanel(this);
 	QScrollArea *drawingPanelScrollArea = new QScrollArea(this);
+
+	QImage *image = new QImage;
+	DrawingFrame *drawingFrame = new DrawingFrame(image, this);
 
 	void createMenus(){
 		QMenu *fileMenu = new QMenu(tr("File(&F)"), this);
@@ -84,11 +88,12 @@ class MainWindow : public QMainWindow
 public:
 	MainWindow(QWidget *parent = 0): QMainWindow(parent){
 		this->createMenus();
-		this->setCentralWidget(this->drawingPanelScrollArea);
-		this->drawingPanelScrollArea->setAlignment(Qt::AlignCenter);
-		this->drawingPanelScrollArea->setWidget(this->drawingPanel);
+		//this->setCentralWidget(this->drawingPanelScrollArea);
+		this->setCentralWidget(this->drawingFrame);
+		//this->drawingPanelScrollArea->setAlignment(Qt::AlignCenter);
+		//this->drawingPanelScrollArea->setWidget(this->drawingPanel);
 		//this->drawingPanelScrollArea->setMinimumSize(this->drawingPanel->minimumSize());
-		this->drawingPanelScrollArea->resize(480, 320);
+		//this->drawingPanelScrollArea->resize(480, 320);
 	}
 	~MainWindow();
 };
